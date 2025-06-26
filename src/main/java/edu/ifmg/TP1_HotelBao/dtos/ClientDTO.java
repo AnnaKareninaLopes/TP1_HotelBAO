@@ -1,36 +1,22 @@
-package edu.ifmg.TP1_HotelBao.entities;
+package edu.ifmg.TP1_HotelBao.dtos;
 
-import jakarta.persistence.*;
+import edu.ifmg.TP1_HotelBao.entities.Client;
+import jakarta.persistence.Column;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+public class ClientDTO {
 
-@Entity
-@Table(name = "tb_client")
-public class Client {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Autoincremento
     private Long id;
-
     private String nome;
     private String email;
-    @Column(unique = true)
     private String senha;
-    @Column(unique = true)
     private String login;
     private String celular;
-    @Column(unique = true)
     private String endereco;
 
-    @OneToMany(mappedBy = "client")
-    private List<Stay> stays = new ArrayList<>();
-
-    public Client() {
+    public ClientDTO() {
     }
 
-    public Client(Long id, String nome, String email, String senha, String login, String celular, String endereco) {
+    public ClientDTO(Long id, String nome, String email, String senha, String login, String celular, String endereco) {
         this.id = id;
         this.nome = nome;
         this.email = email;
@@ -38,6 +24,16 @@ public class Client {
         this.login = login;
         this.celular = celular;
         this.endereco = endereco;
+    }
+
+    public ClientDTO(Client entity) {
+        this.id = entity.getId();
+        this.nome = entity.getNome();
+        this.email = entity.getEmail();
+        this.senha = entity.getSenha();
+        this.login = entity.getLogin();
+        this.celular = entity.getCelular();
+        this.endereco = entity.getEndereco();
     }
 
     public Long getId() {
@@ -97,19 +93,8 @@ public class Client {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Client client)) return false;
-        return Objects.equals(id, client.id) && Objects.equals(senha, client.senha) && Objects.equals(login, client.login);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, senha, login);
-    }
-
-    @Override
     public String toString() {
-        return "Client{" +
+        return "ClientDTO{" +
                 "id=" + id +
                 ", nome='" + nome + '\'' +
                 ", email='" + email + '\'' +
@@ -119,5 +104,4 @@ public class Client {
                 ", endereco='" + endereco + '\'' +
                 '}';
     }
-
 }

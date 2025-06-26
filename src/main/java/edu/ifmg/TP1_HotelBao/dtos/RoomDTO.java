@@ -1,33 +1,36 @@
-package edu.ifmg.TP1_HotelBao.entities;
+package edu.ifmg.TP1_HotelBao.dtos;
 
-import jakarta.persistence.*;
+import edu.ifmg.TP1_HotelBao.entities.Room;
+import edu.ifmg.TP1_HotelBao.entities.Stay;
+import edu.ifmg.TP1_HotelBao.entities.Client;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "tb_room")
-public class Room {
+public class RoomDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(columnDefinition = "TEXT")
     private String descricao;
     private Double valor;
     private String imagemUrl;
+    private List<StayDTO> stays = new ArrayList<>();
 
-    @OneToMany(mappedBy = "room")
-    private List<Stay> stays = new ArrayList<>();
-
-    public Room() {
+    public RoomDTO() {
     }
 
-    public Room(Long id, String descricao, Double valor, String imagemUrl) {
+    public RoomDTO(Long id, String descricao, Double valor, String imagemUrl) {
         this.id = id;
         this.descricao = descricao;
         this.valor = valor;
         this.imagemUrl = imagemUrl;
+    }
+
+    public RoomDTO(Room entity) {
+        this.id = entity.getId();
+        this.descricao = entity.getDescricao();
+        this.valor = entity.getValor();
+        this.imagemUrl = entity.getImagemUrl();
+
     }
 
     public Long getId() {
@@ -62,14 +65,11 @@ public class Room {
         this.imagemUrl = imagemUrl;
     }
 
-    @Override
-    public String toString() {
-        return "Room{" +
-                "id=" + id +
-                ", descricao='" + descricao + '\'' +
-                ", valor=" + valor +
-                ", imagemUrl='" + imagemUrl + '\'' +
-                '}';
+    public List<StayDTO> getStays() {
+        return stays;
     }
 
+    public void setStays(List<StayDTO> stays) {
+        this.stays = stays;
+    }
 }
