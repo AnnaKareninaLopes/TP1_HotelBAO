@@ -2,7 +2,7 @@ package edu.ifmg.TP1_HotelBao.entities;
 
 import jakarta.persistence.*;
 
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
@@ -21,14 +21,14 @@ public class Stay {
     @JoinColumn(name = "room_id")
     private Room room;
 
-    @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
-    private Instant dataEntrada;
+    @Column(columnDefinition = "DATE")
+    private LocalDate dataEntrada;
 
     public Stay() {
 
     }
 
-    public Stay(Long id, Client cliente, Room room, Instant dataEntrada) {
+    public Stay(Long id, Client cliente, Room room, LocalDate dataEntrada) {
         this.id = id;
         this.client = cliente;
         this.room = room;
@@ -59,11 +59,11 @@ public class Stay {
         this.room = room;
     }
 
-    public Instant getDataEntrada() {
+    public LocalDate getDataEntrada() {
         return dataEntrada;
     }
 
-    public void setDataEntrada(Instant dataEntrada) {
+    public void setDataEntrada(LocalDate dataEntrada) {
         this.dataEntrada = dataEntrada;
     }
 

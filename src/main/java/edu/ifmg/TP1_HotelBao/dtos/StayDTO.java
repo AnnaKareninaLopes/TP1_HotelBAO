@@ -2,19 +2,19 @@ package edu.ifmg.TP1_HotelBao.dtos;
 
 import edu.ifmg.TP1_HotelBao.entities.Stay;
 
-import java.time.Instant;
+import java.time.LocalDate;
 
 public class StayDTO {
 
     private Long id;
     private Long clientId;
     private Long roomId;
-    private Instant dataEntrada;
+    private LocalDate dataEntrada;
 
     public StayDTO() {
     }
 
-    public StayDTO(Long id, Long clientId, Long roomId, Instant dataEntrada) {
+    public StayDTO(Long id, Long clientId, Long roomId, LocalDate dataEntrada) {
         this.id = id;
         this.clientId = clientId;
         this.roomId = roomId;
@@ -52,11 +52,11 @@ public class StayDTO {
         this.roomId = roomId;
     }
 
-    public Instant getDataEntrada() {
+    public LocalDate getDataEntrada() {
         return dataEntrada;
     }
 
-    public void setDataEntrada(Instant dataEntrada) {
+    public void setDataEntrada(LocalDate dataEntrada) {
         this.dataEntrada = dataEntrada;
     }
 

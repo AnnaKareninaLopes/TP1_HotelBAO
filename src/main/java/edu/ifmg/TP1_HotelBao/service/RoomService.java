@@ -21,6 +21,8 @@ public class RoomService {
     @Autowired
     private RoomRepository roomRepository;
 
+
+
     @Transactional(readOnly=true)
     public Page<RoomDTO> findAll(Pageable pageable) {
         Page<Room> rooms = roomRepository.findAll(pageable);
