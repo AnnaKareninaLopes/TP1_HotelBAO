@@ -88,7 +88,7 @@ public class ClientResource {
                     @ApiResponse(responseCode = "404", description = "Client or stay not found")
             }
     )
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_CLIENT')")
     public ResponseEntity<StayValueDTO> getMaxStay(@PathVariable Long id) {
         StayValueDTO dto = clientService.getMaxStayByClient(id);
         return ResponseEntity.ok().body(dto);
@@ -105,7 +105,7 @@ public class ClientResource {
                     @ApiResponse(responseCode = "404", description = "Client or stay not found")
             }
     )
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_CLIENT')")
     public ResponseEntity<StayValueDTO> getMinStay(@PathVariable Long id) {
         StayValueDTO dto = clientService.getMinStayByClient(id);
         return ResponseEntity.ok().body(dto);
@@ -122,7 +122,7 @@ public class ClientResource {
                     @ApiResponse(responseCode = "404", description = "Client not found")
             }
     )
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_CLIENT')")
     public ResponseEntity<StayCountDTO> getTotalEstadias(@PathVariable Long id) {
         StayCountDTO dto = clientService.getTotalStaysByClient(id);
         return ResponseEntity.ok().body(dto);

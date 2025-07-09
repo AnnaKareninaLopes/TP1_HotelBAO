@@ -82,7 +82,7 @@ public class StayResource {
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             }
     )
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_CLIENT')")
     public ResponseEntity<StayDTO> insert(@RequestBody StayDTO stayDTO) {
 
         stayDTO = stayService.insert(stayDTO);
