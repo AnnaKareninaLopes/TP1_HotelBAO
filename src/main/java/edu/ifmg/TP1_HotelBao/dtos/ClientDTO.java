@@ -1,39 +1,48 @@
 package edu.ifmg.TP1_HotelBao.dtos;
 
 import edu.ifmg.TP1_HotelBao.entities.Client;
-import jakarta.persistence.Column;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class ClientDTO {
 
     private Long id;
-    private String nome;
+    @NotBlank(message = "Campo obrigatório!")
+    private String username;
+    @Email(message = "E-mail inválido!")
     private String email;
-    private String senha;
+    @NotBlank(message = "Campo obrigatório!")
     private String login;
     private String celular;
     private String endereco;
 
+    private Set<RoleDTO> roles = new HashSet<>();
+
     public ClientDTO() {
     }
 
-    public ClientDTO(Long id, String nome, String email, String senha, String login, String celular, String endereco) {
+    public ClientDTO(Long id, String username, String email, String password, String login, String celular, String endereco) {
         this.id = id;
-        this.nome = nome;
+        this.username = username;
         this.email = email;
-        this.senha = senha;
         this.login = login;
         this.celular = celular;
         this.endereco = endereco;
     }
 
-    public ClientDTO(Client entity) {
-        this.id = entity.getId();
-        this.nome = entity.getNome();
-        this.email = entity.getEmail();
-        this.senha = entity.getSenha();
-        this.login = entity.getLogin();
-        this.celular = entity.getCelular();
-        this.endereco = entity.getEndereco();
+    public ClientDTO(Client client) {
+        id = client.getId();
+        username = client.getUsername();
+        email = client.getEmail();
+        login = client.getLogin();
+        celular = client.getCelular();
+        endereco = client.getEndereco();
+        client.getRoles().forEach(role ->
+                roles.add(new RoleDTO(role))
+        );
     }
 
     public Long getId() {
@@ -44,12 +53,12 @@ public class ClientDTO {
         this.id = id;
     }
 
-    public String getNome() {
-        return nome;
+    public String getUsername() {
+        return username;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmail() {
@@ -58,14 +67,6 @@ public class ClientDTO {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
     }
 
     public String getLogin() {
@@ -92,13 +93,21 @@ public class ClientDTO {
         this.endereco = endereco;
     }
 
+    public Set<RoleDTO> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<RoleDTO> roles) {
+        this.roles = roles;
+    }
+
     @Override
     public String toString() {
         return "ClientDTO{" +
                 "id=" + id +
-                ", nome='" + nome + '\'' +
+                ", nome='" + username + '\'' +
                 ", email='" + email + '\'' +
-                ", senha='" + senha + '\'' +
+
                 ", login='" + login + '\'' +
                 ", celular='" + celular + '\'' +
                 ", endereco='" + endereco + '\'' +

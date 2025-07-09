@@ -1,23 +1,23 @@
 package edu.ifmg.TP1_HotelBao.entities;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Table(name = "tb_client")
-public class Client {
+public class Client implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Autoincremento
     private Long id;
 
-    private String nome;
+    private String username;
     private String email;
     @Column(unique = true)
-    private String senha;
+    private String password;
     @Column(unique = true)
     private String login;
     private String celular;
@@ -27,17 +27,39 @@ public class Client {
     @OneToMany(mappedBy = "client")
     private List<Stay> stays = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(name = "tb_client_role",
+            joinColumns = @JoinColumn(name = "client_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
+
     public Client() {
     }
 
-    public Client(Long id, String nome, String email, String senha, String login, String celular, String endereco) {
+    public Client(Long id, String username, String email, String password, String login, String celular, String endereco) {
         this.id = id;
-        this.nome = nome;
+        this.username = username;
         this.email = email;
-        this.senha = senha;
+        this.password = password;
         this.login = login;
         this.celular = celular;
         this.endereco = endereco;
+    }
+
+    public Client(Client entity) {
+        this.id = entity.getId();
+        this.username = entity.getUsername();
+        this.email = entity.getEmail();
+        this.password = entity.getPassword();
+        this.login = entity.getLogin();
+        this.celular = entity.getCelular();
+        this.endereco = entity.getEndereco();
+    }
+
+    public Client(Client entity, Set<Role> roles) {
+        this(entity);
+        this.roles = roles;
     }
 
     public Long getId() {
@@ -48,12 +70,13 @@ public class Client {
         this.id = id;
     }
 
-    public String getNome() {
-        return nome;
+    @Override
+    public String getUsername() {
+        return username;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmail() {
@@ -64,12 +87,13 @@ public class Client {
         this.email = email;
     }
 
-    public String getSenha() {
-        return senha;
+    @Override
+    public String getPassword() {
+        return password;
     }
 
-    public void setSenha(String senha) {
-        this.senha = senha;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getLogin() {
@@ -96,24 +120,45 @@ public class Client {
         this.endereco = endereco;
     }
 
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
+    public void addRole(Role role){
+        roles.add(role);
+    }
+
+    public boolean hasRole(String roleName){
+        return !roles.stream().filter(r -> r.getAuthority().equals(roleName)).toList().isEmpty();
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Client client)) return false;
-        return Objects.equals(id, client.id) && Objects.equals(senha, client.senha) && Objects.equals(login, client.login);
+        return Objects.equals(id, client.id) && Objects.equals(username, client.username) && Objects.equals(email, client.email) && Objects.equals(password, client.password) && Objects.equals(login, client.login) && Objects.equals(celular, client.celular) && Objects.equals(endereco, client.endereco) && Objects.equals(stays, client.stays) && Objects.equals(roles, client.roles);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, senha, login);
+        return Objects.hash(id, username, email, password, login, celular, endereco, stays, roles);
     }
 
     @Override
     public String toString() {
         return "Client{" +
                 "id=" + id +
-                ", nome='" + nome + '\'' +
+                ", nome='" + username + '\'' +
                 ", email='" + email + '\'' +
-                ", senha='" + senha + '\'' +
+                ", senha='" + password + '\'' +
                 ", login='" + login + '\'' +
                 ", celular='" + celular + '\'' +
                 ", endereco='" + endereco + '\'' +
