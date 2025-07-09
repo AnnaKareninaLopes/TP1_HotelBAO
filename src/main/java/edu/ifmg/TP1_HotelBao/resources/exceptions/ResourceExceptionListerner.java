@@ -1,8 +1,6 @@
 package edu.ifmg.TP1_HotelBao.resources.exceptions;
 
-import edu.ifmg.TP1_HotelBao.service.exceptions.DatabaseException;
-import edu.ifmg.TP1_HotelBao.service.exceptions.EmailException;
-import edu.ifmg.TP1_HotelBao.service.exceptions.ResourceNotFound;
+import edu.ifmg.TP1_HotelBao.service.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -71,6 +69,36 @@ public class ResourceExceptionListerner {
         error.setStatus(status.value());
         error.setMessage(e.getMessage());
         error.setError("Email error");
+        error.setTimestamp(Instant.now());
+        error.setPath(request.getRequestURI());
+
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(RoomUnavailableException.class)
+    public ResponseEntity<StandartError> emailException(RoomUnavailableException e, HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        StandartError error = new StandartError();
+        error.setStatus(status.value());
+        error.setMessage(e.getMessage());
+        error.setError("Room ocupied");
+        error.setTimestamp(Instant.now());
+        error.setPath(request.getRequestURI());
+
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(ClientNotFoundException.class)
+    public ResponseEntity<StandartError> emailException(ClientNotFoundException e, HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.NOT_FOUND;
+
+        StandartError error = new StandartError();
+        error.setStatus(status.value());
+        error.setMessage(e.getMessage());
+        error.setError("Cliente not found");
         error.setTimestamp(Instant.now());
         error.setPath(request.getRequestURI());
 

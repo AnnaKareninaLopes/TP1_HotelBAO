@@ -16,12 +16,10 @@ public class Client implements UserDetails {
 
     private String username;
     private String email;
-    @Column(unique = true)
     private String password;
     @Column(unique = true)
     private String login;
     private String celular;
-    @Column(unique = true)
     private String endereco;
 
     @OneToMany(mappedBy = "client")

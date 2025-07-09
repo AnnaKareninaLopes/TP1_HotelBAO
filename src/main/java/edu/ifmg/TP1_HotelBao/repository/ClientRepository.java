@@ -19,6 +19,8 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     Client findByLoginAndPassword(String login, String password);
     Client findByEmailAndPassword(String email, String password);
 
+    boolean existsById(Long id);
+
     void deleteAll();
 
     @Query(nativeQuery = true, value = """

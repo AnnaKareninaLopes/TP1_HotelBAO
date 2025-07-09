@@ -17,7 +17,7 @@ public interface StayRepository extends JpaRepository<Stay,Long> {
                 FROM tb_client 
                 WHERE id = :clientId
             """)
-    boolean existsClientById(@Param("clientId") Long clientId);
+    Boolean existsClientById(@Param("clientId") Long clientId);
 
     @Query(nativeQuery = true,
             value = """
@@ -25,7 +25,7 @@ public interface StayRepository extends JpaRepository<Stay,Long> {
                 FROM tb_room 
                 WHERE id = :roomId
             """)
-    boolean existsRoomById(@Param("roomId") Long roomId);
+    Boolean existsRoomById(@Param("roomId") Long roomId);
 
     @Query(nativeQuery = true,
             value = """
@@ -33,6 +33,6 @@ public interface StayRepository extends JpaRepository<Stay,Long> {
                 FROM tb_stay 
                 WHERE room_id = :roomId AND data_entrada = :dataEntrada
             """)
-    boolean existsRoomOccupied(@Param("roomId") Long roomId, @Param("dataEntrada") LocalDate dataEntrada);
+    Long existsRoomOccupied(@Param("roomId") Long roomId, @Param("dataEntrada") LocalDate dataEntrada);
 
 }
