@@ -25,11 +25,12 @@ public class DatabaseService {
 
     @Transactional
     public void limparBanco() {
+        clientRepository.deleteAllClientRoles();
         passwordRecoverRepository.deleteAll();
+        stayRepository.deleteAll();
         clientRepository.deleteAll();
+        roomRepository.deleteAll();
         roleRepository.deleteAll();
-        roomRepository.deleteAll();
-        roomRepository.deleteAll();
     }
 
 }

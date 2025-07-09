@@ -1,20 +1,16 @@
 package edu.ifmg.TP1_HotelBao.resources;
 
 import edu.ifmg.TP1_HotelBao.dtos.*;
-import edu.ifmg.TP1_HotelBao.entities.Client;
 import edu.ifmg.TP1_HotelBao.repository.StayRepository;
 import edu.ifmg.TP1_HotelBao.service.ClientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -33,10 +29,12 @@ public class ClientResource {
 
     @GetMapping(produces = "application/json")
     @Operation(
-            description = "Create a new client",
-            summary = "Create a new client",
+            description = "List all clients with pagination",
+            summary = "List all clients",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                    @ApiResponse(responseCode = "403", description = "Forbidden")
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
@@ -47,11 +45,13 @@ public class ClientResource {
 
     @GetMapping(value = "/{id}", produces = "application/json")
     @Operation(
-            description = "Create a new client",
-            summary = "Create a new client",
+            description = "Find client by ID",
+            summary = "Find client by ID",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "404", description = "Not Found"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                    @ApiResponse(responseCode = "403", description = "Forbidden"),
+                    @ApiResponse(responseCode = "404", description = "Not Found")
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
@@ -60,15 +60,15 @@ public class ClientResource {
         return ResponseEntity.ok().body(client);
     }
 
-
-
     @GetMapping(value = "/{id}/invoice", produces = "application/json")
     @Operation(
-            description = "Get invoice",
-            summary = "Get invoice",
+            description = "Get client invoice with stay details",
+            summary = "Get client invoice",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "404", description = "Not Found"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                    @ApiResponse(responseCode = "403", description = "Forbidden"),
+                    @ApiResponse(responseCode = "404", description = "Client not found")
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
@@ -77,14 +77,15 @@ public class ClientResource {
         return ResponseEntity.ok().body(invoice);
     }
 
-
     @GetMapping(value = "/{id}/stay/max", produces = "application/json")
     @Operation(
-            description = "Retorna a estadia mais cara do cliente",
-            summary = "Estadia mais cara",
+            description = "Returns the client's most expensive stay",
+            summary = "Most expensive stay",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "404", description = "Cliente ou estadia não encontrados"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                    @ApiResponse(responseCode = "403", description = "Forbidden"),
+                    @ApiResponse(responseCode = "404", description = "Client or stay not found")
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
@@ -95,11 +96,13 @@ public class ClientResource {
 
     @GetMapping(value = "/{id}/stay/min", produces = "application/json")
     @Operation(
-            description = "Retorna a estadia mais barata do cliente",
-            summary = "Estadia mais barata",
+            description = "Returns the client's cheapest stay",
+            summary = "Cheapest stay",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "404", description = "Cliente ou estadia não encontrados"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                    @ApiResponse(responseCode = "403", description = "Forbidden"),
+                    @ApiResponse(responseCode = "404", description = "Client or stay not found")
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
@@ -110,11 +113,13 @@ public class ClientResource {
 
     @GetMapping(value = "/{id}/stay/total", produces = "application/json")
     @Operation(
-            description = "Retorna o total de estadias por cliente",
-            summary = "Total de estadias",
+            description = "Returns the total number of stays for a client",
+            summary = "Total stays count",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "404", description = "Cliente ou estadia não encontrados"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                    @ApiResponse(responseCode = "403", description = "Forbidden"),
+                    @ApiResponse(responseCode = "404", description = "Client not found")
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
@@ -123,18 +128,15 @@ public class ClientResource {
         return ResponseEntity.ok().body(dto);
     }
 
-
-
-
     @PostMapping(produces = "application/json")
     @Operation(
-            description = "Create a new client",
+            description = "Create a new client with admin privileges",
             summary = "Create a new client",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Client created"),
                     @ApiResponse(responseCode = "400", description = "Bad Request"),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden"),
+                    @ApiResponse(responseCode = "403", description = "Forbidden")
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
@@ -150,13 +152,11 @@ public class ClientResource {
 
     @PostMapping(value = "/signup", produces = "application/json")
     @Operation(
-            description = "Sign up",
-            summary = "You can sign up",
+            description = "Public endpoint for client registration",
+            summary = "Sign up as a client",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Client created"),
-                    @ApiResponse(responseCode = "400", description = "Bad Request"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden"),
+                    @ApiResponse(responseCode = "400", description = "Bad Request - Invalid data or email already exists")
             }
     )
     public ResponseEntity<ClientDTO> signup(@RequestBody ClientInsertDTO dto) {
@@ -168,32 +168,32 @@ public class ClientResource {
 
     @PutMapping(value = "/{id}", produces = "application/json")
     @Operation(
-            description = "Create a new Client",
-            summary = "Create a new Client",
+            description = "Update an existing client",
+            summary = "Update client information",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "400", description = "Bad Request"),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
-                    @ApiResponse(responseCode = "404", description = "Not Found"),
+                    @ApiResponse(responseCode = "404", description = "Not Found")
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ClientDTO> update (@PathVariable Long id, @RequestBody ClientDTO clientDTO) {
+    public ResponseEntity<ClientDTO> update(@PathVariable Long id, @RequestBody ClientDTO clientDTO) {
         clientDTO = clientService.update(id, clientDTO);
         return ResponseEntity.ok().body(clientDTO);
     }
 
     @DeleteMapping(value = "/{id}")
     @Operation(
-            description = "Create a new client",
-            summary = "Create a new client",
+            description = "Delete a client by ID",
+            summary = "Delete client",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "204", description = "No Content - Client successfully deleted"),
                     @ApiResponse(responseCode = "400", description = "Bad Request"),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
-                    @ApiResponse(responseCode = "404", description = "Not Found"),
+                    @ApiResponse(responseCode = "404", description = "Not Found")
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
