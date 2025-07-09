@@ -70,7 +70,7 @@ public class Client implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return this.login;
     }
 
     public void setUsername(String username) {

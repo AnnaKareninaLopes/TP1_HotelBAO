@@ -1,14 +1,14 @@
 package edu.ifmg.TP1_HotelBao.service;
 
-import edu.ifmg.TP1_HotelBao.dtos.ClientDTO;
-import edu.ifmg.TP1_HotelBao.dtos.ClientInsertDTO;
-import edu.ifmg.TP1_HotelBao.dtos.RoleDTO;
+import edu.ifmg.TP1_HotelBao.dtos.*;
 import edu.ifmg.TP1_HotelBao.entities.Client;
 import edu.ifmg.TP1_HotelBao.entities.Role;
+import edu.ifmg.TP1_HotelBao.entities.Stay;
 import edu.ifmg.TP1_HotelBao.projections.UserDetailsProjection;
 import edu.ifmg.TP1_HotelBao.repository.ClientRepository;
 
 import edu.ifmg.TP1_HotelBao.repository.RoleRepository;
+import edu.ifmg.TP1_HotelBao.repository.StayRepository;
 import edu.ifmg.TP1_HotelBao.service.exceptions.DatabaseException;
 import edu.ifmg.TP1_HotelBao.service.exceptions.ResourceNotFound;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,6 +35,10 @@ public class ClientService implements UserDetailsService {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private StayRepository stayRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     public void validateClientExists(Long id) {
@@ -139,7 +143,7 @@ public class ClientService implements UserDetailsService {
         Client client = new Client();
         copyDtoToEntity(dto, client);
 
-        Role role = roleRepository.findByAuthority("ROLE_CLIENTE");
+        Role role = roleRepository.findByAuthority("ROLE_CLIENT");
 
         client.getRoles().clear();
         client.getRoles().add(role);
@@ -147,6 +151,58 @@ public class ClientService implements UserDetailsService {
         client = clientRepository.save(client);
 
         return new ClientDTO(client);
+    }
+
+    public InvoiceDTO getInvoice(Long clientId) {
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new ResourceNotFound("Cliente não encontrado"));
+
+        List<InvoiceStayDTO> estadias = stayRepository.buscarEstadiasDoCliente(clientId);
+        Double total = stayRepository.calcularTotalPorCliente(clientId);
+
+        return new InvoiceDTO(
+                client.getId(),
+                client.getUsername(),
+                client.getEndereco(),
+                client.getCelular(),
+                client.getEmail(),
+                estadias,
+                total
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public StayValueDTO getMaxStayByClient(Long clientId) {
+        validateClientExists(clientId);
+        Optional<Stay> stayOpt = stayRepository.findMaxStayByClientId(clientId);
+
+        Stay stay = stayOpt.orElseThrow(() -> new ResourceNotFound("Nenhuma estadia encontrada para o cliente " + clientId));
+        return new StayValueDTO(
+                stay.getRoom().getDescricao(),
+                stay.getRoom().getValor()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public StayValueDTO getMinStayByClient(Long clientId) {
+        validateClientExists(clientId);
+        Optional<Stay> stayOpt = stayRepository.findMinStayByClientId(clientId);
+
+        Stay stay = stayOpt.orElseThrow(() -> new ResourceNotFound("Nenhuma estadia encontrada para o cliente " + clientId));
+        return new StayValueDTO(
+                stay.getRoom().getDescricao(),
+                stay.getRoom().getValor()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public StayCountDTO getTotalStaysByClient(Long clientId) {
+        validateClientExists(clientId);
+        Double quantidade = stayRepository.calcularTotalPorCliente(clientId);
+        if (quantidade == null) {
+            quantidade = (double) 0L;
+        }
+        return new StayCountDTO(clientId, quantidade);
     }
 
 }

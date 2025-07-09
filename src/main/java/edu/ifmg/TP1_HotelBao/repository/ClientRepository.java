@@ -28,9 +28,9 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
                c.password AS password,
                r.id AS roleId,
                r.authority
-        FROM client c
-        INNER JOIN client_role cr ON c.id = cr.client_id
-        INNER JOIN role r ON r.id = cr.role_id
+        FROM tb_client c
+        INNER JOIN tb_client_role cr ON c.id = cr.client_id
+        INNER JOIN tb_role r ON r.id = cr.role_id
         WHERE c.login = :username
     """)
     List<UserDetailsProjection> findUserAndRoleByLogin(@Param("username") String username);
@@ -39,17 +39,17 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
             nativeQuery = true,
             value = """
             SELECT c.id, c.email, c.login, c.username, c.password, c.celular, c.endereco
-            FROM client c
-            INNER JOIN client_role cr ON c.id = cr.client_id
-            INNER JOIN role r ON r.id = cr.role_id
-            WHERE r.authority = 'ROLE_CLIENTE'
+            FROM tb_client c
+            INNER JOIN tb_client_role cr ON c.id = cr.client_id
+            INNER JOIN tb_role r ON r.id = cr.role_id
+            WHERE r.authority = 'ROLE_CLIENT'
         """,
             countQuery = """
             SELECT COUNT(*)
             FROM client c
-            INNER JOIN client_role cr ON c.id = cr.client_id
-            INNER JOIN role r ON r.id = cr.role_id
-            WHERE r.authority = 'ROLE_CLIENTE'
+            INNER JOIN tb_client_role cr ON c.id = cr.client_id
+            INNER JOIN tb_role r ON r.id = cr.role_id
+            WHERE r.authority = 'ROLE_CLIENT'
         """
     )
     Page<Client> findAllClients(Pageable pageable);
