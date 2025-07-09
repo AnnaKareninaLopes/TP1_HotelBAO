@@ -48,7 +48,7 @@ public interface StayRepository extends JpaRepository<Stay,Long> {
     Double calcularTotalPorCliente(@Param("clientId") Long clientId);
 
     @Query(value = """
-    SELECT * FROM tb_stay s
+    SELECT s.* FROM tb_stay s
     INNER JOIN tb_room r ON s.room_id = r.id
     WHERE s.client_id = :clientId
     ORDER BY r.valor DESC
@@ -57,7 +57,7 @@ public interface StayRepository extends JpaRepository<Stay,Long> {
     Optional<Stay> findMaxStayByClientId(@Param("clientId") Long clientId);
 
     @Query(value = """
-    SELECT * FROM tb_stay s
+    SELECT s.* FROM tb_stay s
     INNER JOIN tb_room r ON s.room_id = r.id
     WHERE s.client_id = :clientId
     ORDER BY r.valor ASC
