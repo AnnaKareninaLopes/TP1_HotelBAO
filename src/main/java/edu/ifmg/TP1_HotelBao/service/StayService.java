@@ -47,15 +47,15 @@ public class StayService {
     }
 
     private void validateClientAndRoom(Long clientId, Long roomId, LocalDate dataEntrada) {
-        if (!stayRepository.existsClientById(clientId)) {
+        if (!clientRepository.existsById(clientId)) {
             throw new ClientNotFoundException("Cliente com ID " + clientId + " não encontrado.");
         }
 
-        if (!stayRepository.existsRoomById(roomId)) {
+        if (!roomRepository.existsRoomById(roomId)) {
             throw new ResourceNotFound("Quarto com ID " + roomId + " não encontrado.");
         }
 
-        if (stayRepository.existsRoomOccupied(roomId, dataEntrada)) {
+        if (stayRepository.existsRoomOccupied(roomId, dataEntrada) > 0) {
             throw new RoomUnavailableException("O quarto com ID " + roomId + " já está ocupado na data informada.");
         }
     }

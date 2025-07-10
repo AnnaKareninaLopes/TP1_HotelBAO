@@ -5,3 +5,4 @@ INSERT INTO tb_client (nome, email, senha, login, celular, endereco) VALUES ('Jo
 INSERT INTO tb_room (descricao, valor, imagem_url) VALUES ('Quarto Simples com ventilador', 120.00, '/images/quarto_simples.jpg');
 
 INSERT INTO tb_room (descricao, valor, imagem_url) VALUES ('Suíte Master com ar-condicionado e varanda', 300.00, '/images/suite_master.jpg');
+
