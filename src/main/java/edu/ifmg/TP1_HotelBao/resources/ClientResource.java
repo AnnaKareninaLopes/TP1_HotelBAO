@@ -1,20 +1,26 @@
 package edu.ifmg.TP1_HotelBao.resources;
 
 import edu.ifmg.TP1_HotelBao.dtos.*;
-import edu.ifmg.TP1_HotelBao.repository.StayRepository;
 import edu.ifmg.TP1_HotelBao.service.ClientService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Page;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.net.URI;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 @RequestMapping(value = "/clients")
@@ -25,7 +31,7 @@ public class ClientResource {
     private ClientService clientService;
 
     @Autowired
-    private StayRepository stayRepository;
+    private PagedResourcesAssembler<ClientDTO> pagedResourcesAssembler;
 
     @GetMapping(produces = "application/json")
     @Operation(
@@ -38,9 +44,13 @@ public class ClientResource {
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
-    public ResponseEntity<Page<ClientDTO>> findAll(Pageable pageable){
+    public ResponseEntity<PagedModel<EntityModel<ClientDTO>>> findAll(Pageable pageable){
         Page<ClientDTO> clients = clientService.findAll(pageable);
-        return ResponseEntity.ok().body(clients);
+        PagedModel<EntityModel<ClientDTO>> pagedModel = pagedResourcesAssembler.toModel(
+                clients,
+                client -> addLinksToClient(client)
+        );
+        return ResponseEntity.ok().body(pagedModel);
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")
@@ -55,9 +65,10 @@ public class ClientResource {
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ClientDTO> findById(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<ClientDTO>> findById(@PathVariable Long id) {
         ClientDTO client = clientService.findById(id);
-        return ResponseEntity.ok().body(client);
+        EntityModel<ClientDTO> resource = addLinksToClient(client);
+        return ResponseEntity.ok().body(resource);
     }
 
     @GetMapping(value = "/{id}/invoice", produces = "application/json")
@@ -72,9 +83,19 @@ public class ClientResource {
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
-    public ResponseEntity<InvoiceDTO> getInvoice(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<InvoiceDTO>> getInvoice(@PathVariable Long id) {
         InvoiceDTO invoice = clientService.getInvoice(id);
-        return ResponseEntity.ok().body(invoice);
+        EntityModel<InvoiceDTO> resource = EntityModel.of(invoice);
+
+        // Add link to client
+        Link clientLink = linkTo(methodOn(ClientResource.class).findById(id)).withRel("client");
+        resource.add(clientLink);
+
+        // Add link to self
+        Link selfLink = linkTo(methodOn(ClientResource.class).getInvoice(id)).withSelfRel();
+        resource.add(selfLink);
+
+        return ResponseEntity.ok().body(resource);
     }
 
     @GetMapping(value = "/{id}/stay/max", produces = "application/json")
@@ -89,9 +110,19 @@ public class ClientResource {
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_CLIENT')")
-    public ResponseEntity<StayValueDTO> getMaxStay(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<StayValueDTO>> getMaxStay(@PathVariable Long id) {
         StayValueDTO dto = clientService.getMaxStayByClient(id);
-        return ResponseEntity.ok().body(dto);
+        EntityModel<StayValueDTO> resource = EntityModel.of(dto);
+
+        // Add link to client
+        Link clientLink = linkTo(methodOn(ClientResource.class).findById(id)).withRel("client");
+        resource.add(clientLink);
+
+        // Add link to self
+        Link selfLink = linkTo(methodOn(ClientResource.class).getMaxStay(id)).withSelfRel();
+        resource.add(selfLink);
+
+        return ResponseEntity.ok().body(resource);
     }
 
     @GetMapping(value = "/{id}/stay/min", produces = "application/json")
@@ -106,9 +137,19 @@ public class ClientResource {
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_CLIENT')")
-    public ResponseEntity<StayValueDTO> getMinStay(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<StayValueDTO>> getMinStay(@PathVariable Long id) {
         StayValueDTO dto = clientService.getMinStayByClient(id);
-        return ResponseEntity.ok().body(dto);
+        EntityModel<StayValueDTO> resource = EntityModel.of(dto);
+
+        // Add link to client
+        Link clientLink = linkTo(methodOn(ClientResource.class).findById(id)).withRel("client");
+        resource.add(clientLink);
+
+        // Add link to self
+        Link selfLink = linkTo(methodOn(ClientResource.class).getMinStay(id)).withSelfRel();
+        resource.add(selfLink);
+
+        return ResponseEntity.ok().body(resource);
     }
 
     @GetMapping(value = "/{id}/stay/total", produces = "application/json")
@@ -123,9 +164,19 @@ public class ClientResource {
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_CLIENT')")
-    public ResponseEntity<StayCountDTO> getTotalEstadias(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<StayCountDTO>> getTotalEstadias(@PathVariable Long id) {
         StayCountDTO dto = clientService.getTotalStaysByClient(id);
-        return ResponseEntity.ok().body(dto);
+        EntityModel<StayCountDTO> resource = EntityModel.of(dto);
+
+        // Add link to client
+        Link clientLink = linkTo(methodOn(ClientResource.class).findById(id)).withRel("client");
+        resource.add(clientLink);
+
+        // Add link to self
+        Link selfLink = linkTo(methodOn(ClientResource.class).getTotalEstadias(id)).withSelfRel();
+        resource.add(selfLink);
+
+        return ResponseEntity.ok().body(resource);
     }
 
     @PostMapping(produces = "application/json")
@@ -140,14 +191,15 @@ public class ClientResource {
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ClientDTO> insert(@RequestBody ClientInsertDTO dto) {
+    public ResponseEntity<EntityModel<ClientDTO>> insert(@RequestBody ClientInsertDTO dto) {
         ClientDTO client = clientService.insert(dto);
+        EntityModel<ClientDTO> resource = addLinksToClient(client);
 
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{id}")
                 .buildAndExpand(client.getId()).toUri();
 
-        return ResponseEntity.created(uri).body(client);
+        return ResponseEntity.created(uri).body(resource);
     }
 
     @PostMapping(value = "/signup", produces = "application/json")
@@ -159,11 +211,14 @@ public class ClientResource {
                     @ApiResponse(responseCode = "400", description = "Bad Request - Invalid data or email already exists")
             }
     )
-    public ResponseEntity<ClientDTO> signup(@RequestBody ClientInsertDTO dto) {
+    public ResponseEntity<EntityModel<ClientDTO>> signup(@RequestBody ClientInsertDTO dto) {
         ClientDTO client = clientService.signup(dto);
+        EntityModel<ClientDTO> resource = addLinksToClient(client);
+
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(client.getId()).toUri();
-        return ResponseEntity.created(uri).body(client);
+
+        return ResponseEntity.created(uri).body(resource);
     }
 
     @PutMapping(value = "/{id}", produces = "application/json")
@@ -179,9 +234,10 @@ public class ClientResource {
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
-    public ResponseEntity<ClientDTO> update(@PathVariable Long id, @RequestBody ClientDTO clientDTO) {
-        clientDTO = clientService.update(id, clientDTO);
-        return ResponseEntity.ok().body(clientDTO);
+    public ResponseEntity<EntityModel<ClientDTO>> update(@PathVariable Long id, @RequestBody ClientDTO clientDTO) {
+        ClientDTO updatedClient = clientService.update(id, clientDTO);
+        EntityModel<ClientDTO> resource = addLinksToClient(updatedClient);
+        return ResponseEntity.ok().body(resource);
     }
 
     @DeleteMapping(value = "/{id}")
@@ -202,4 +258,35 @@ public class ClientResource {
         return ResponseEntity.noContent().build();
     }
 
+    private EntityModel<ClientDTO> addLinksToClient(ClientDTO client) {
+        EntityModel<ClientDTO> resource = EntityModel.of(client);
+
+        // Self link
+        Link selfLink = linkTo(methodOn(ClientResource.class).findById(client.getId())).withSelfRel();
+        resource.add(selfLink);
+
+        // Add invoice link
+        Link invoiceLink = linkTo(methodOn(ClientResource.class).getInvoice(client.getId())).withRel("invoice");
+        resource.add(invoiceLink);
+
+        // Add stay statistics links
+        Link maxStayLink = linkTo(methodOn(ClientResource.class).getMaxStay(client.getId())).withRel("max-stay");
+        resource.add(maxStayLink);
+
+        Link minStayLink = linkTo(methodOn(ClientResource.class).getMinStay(client.getId())).withRel("min-stay");
+        resource.add(minStayLink);
+
+        Link totalStaysLink = linkTo(methodOn(ClientResource.class).getTotalEstadias(client.getId())).withRel("total-stays");
+        resource.add(totalStaysLink);
+
+        // Add update link
+        Link updateLink = linkTo(methodOn(ClientResource.class).update(client.getId(), client)).withRel("update");
+        resource.add(updateLink);
+
+        // Add delete link
+        Link deleteLink = linkTo(methodOn(ClientResource.class).delete(client.getId())).withRel("delete");
+        resource.add(deleteLink);
+
+        return resource;
+    }
 }
