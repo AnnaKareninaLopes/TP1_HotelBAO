@@ -4,10 +4,10 @@ INSERT INTO tb_role (id, authority) VALUES (2, 'ROLE_CLIENT');
 
 -- 2. Inserir clients
 INSERT INTO tb_client (id, username, email, password, login, celular, endereco)
-VALUES (1, 'Anna Karenina', 'anna@ifmg.edu.br', '123', 'annak', '31999999999', 'Rua das Flores, 100');
+VALUES (1, 'Anna Karenina', 'anna@ifmg.edu.br', '2a$12$VN08e9jTMoJ5g.IJ3ryujubBxXr4hCMwAreGTsjZQVromZqpSVNFS', 'annak', '31999999999', 'Rua das Flores, 100');
 
 INSERT INTO tb_client (id, username, email, password, login, celular, endereco)
-VALUES (2, 'João Silva', 'joao@email.com', '456', 'joaos', '31988888888', 'Av. Central, 200');
+VALUES (2, 'João Silva', 'joao@email.com', '2a$12$VN08e9jTMoJ5g.IJ3ryujubBxXr4hCMwAreGTsjZQVromZqpSVNFS', 'joaos', '31988888888', 'Av. Central, 200');
 
 INSERT INTO tb_client_role (client_id, role_id) VALUES (1, 1);
 INSERT INTO tb_client_role (client_id, role_id) VALUES (2, 2);

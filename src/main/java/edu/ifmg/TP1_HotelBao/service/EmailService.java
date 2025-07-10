@@ -15,6 +15,7 @@ public class EmailService {
     @Value("${EMAIL_USERNAME}")
     private String emailFrom;
 
+    @Autowired
     private JavaMailSender mailSender;
 
     public void sendMail(EmailDTO emailDTO){
