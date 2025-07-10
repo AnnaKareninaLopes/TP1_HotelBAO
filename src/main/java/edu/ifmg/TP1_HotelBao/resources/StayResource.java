@@ -6,11 +6,16 @@ import edu.ifmg.TP1_HotelBao.service.RoomService;
 import edu.ifmg.TP1_HotelBao.service.StayService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,8 +23,12 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 @RestController
 @RequestMapping(value = "/stays")
+@Tag(name = "Stay", description = "Controller for managing stays")
 public class StayResource {
 
     @Autowired
@@ -31,7 +40,10 @@ public class StayResource {
     @Autowired
     private RoomService roomService;
 
-    @GetMapping
+    @Autowired
+    private PagedResourcesAssembler<StayDTO> pagedResourcesAssembler;
+
+    @GetMapping(produces = "application/json")
     @Operation(
             description = "List all stays with pagination",
             summary = "List all stays",
@@ -42,7 +54,7 @@ public class StayResource {
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
-    public ResponseEntity <Page<StayDTO>> findAll(
+    public ResponseEntity<PagedModel<EntityModel<StayDTO>>> findAll(
             @RequestParam(value = "page", defaultValue = "0") Integer page,
             @RequestParam(value = "size", defaultValue = "20") Integer size,
             @RequestParam(value = "direction", defaultValue = "ASC") String direction,
@@ -50,10 +62,16 @@ public class StayResource {
     ) {
         Pageable pageable = PageRequest.of(page, size, Sort.Direction.valueOf(direction), orderBy);
         Page<StayDTO> stays = stayService.findAll(pageable);
-        return ResponseEntity.ok().body(stays);
+
+        PagedModel<EntityModel<StayDTO>> pagedModel = pagedResourcesAssembler.toModel(
+                stays,
+                stay -> addLinksToStay(stay)
+        );
+
+        return ResponseEntity.ok().body(pagedModel);
     }
 
-    @GetMapping(value = "/{id}")
+    @GetMapping(value = "/{id}", produces = "application/json")
     @Operation(
             description = "Find stay by ID",
             summary = "Find stay by ID",
@@ -65,13 +83,13 @@ public class StayResource {
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
-
-    public ResponseEntity<StayDTO> findById(@PathVariable Long id) {
+    public ResponseEntity<EntityModel<StayDTO>> findById(@PathVariable Long id) {
         StayDTO stay = stayService.findById(id);
-        return ResponseEntity.ok().body(stay);
+        EntityModel<StayDTO> resource = addLinksToStay(stay);
+        return ResponseEntity.ok().body(resource);
     }
 
-    @PostMapping
+    @PostMapping(produces = "application/json")
     @Operation(
             description = "Create a new stay",
             summary = "Create a new stay",
@@ -83,18 +101,18 @@ public class StayResource {
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_CLIENT')")
-    public ResponseEntity<StayDTO> insert(@RequestBody StayDTO stayDTO) {
-
+    public ResponseEntity<EntityModel<StayDTO>> insert(@RequestBody StayDTO stayDTO) {
         stayDTO = stayService.insert(stayDTO);
+        EntityModel<StayDTO> resource = addLinksToStay(stayDTO);
 
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest().path("/{id}")
                 .buildAndExpand(stayDTO.getId()).toUri();
 
-        return ResponseEntity.created(uri).body(stayDTO);
+        return ResponseEntity.created(uri).body(resource);
     }
 
-    @PutMapping(value = "/{id}")
+    @PutMapping(value = "/{id}", produces = "application/json")
     @Operation(
             description = "Update an existing stay",
             summary = "Update stay information",
@@ -107,9 +125,10 @@ public class StayResource {
             }
     )
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
-    public ResponseEntity<StayDTO> update(@PathVariable Long id, @RequestBody StayDTO stayDTO) {
+    public ResponseEntity<EntityModel<StayDTO>> update(@PathVariable Long id, @RequestBody StayDTO stayDTO) {
         stayDTO = stayService.update(id, stayDTO);
-        return ResponseEntity.ok().body(stayDTO);
+        EntityModel<StayDTO> resource = addLinksToStay(stayDTO);
+        return ResponseEntity.ok().body(resource);
     }
 
     @DeleteMapping(value = "/{id}")
@@ -130,4 +149,36 @@ public class StayResource {
         return ResponseEntity.noContent().build();
     }
 
+    private EntityModel<StayDTO> addLinksToStay(StayDTO stay) {
+        EntityModel<StayDTO> resource = EntityModel.of(stay);
+
+        // Self link
+        Link selfLink = linkTo(methodOn(StayResource.class).findById(stay.getId())).withSelfRel();
+        resource.add(selfLink);
+
+        // Link to all stays
+        Link allStaysLink = linkTo(methodOn(StayResource.class).findAll(0, 20, "ASC", "id")).withRel("all-stays");
+        resource.add(allStaysLink);
+
+        // Link to update stay
+        Link updateLink = linkTo(methodOn(StayResource.class).update(stay.getId(), stay)).withRel("update");
+        resource.add(updateLink);
+
+        // Link to delete stay
+        Link deleteLink = linkTo(methodOn(StayResource.class).delete(stay.getId())).withRel("delete");
+        resource.add(deleteLink);
+
+        // Add links to related client if client ID is available
+        if (stay.getClientId() != null) {
+            Link clientLink = linkTo(methodOn(ClientResource.class).findById(stay.getClientId())).withRel("client");
+            resource.add(clientLink);
+        }
+
+        if (stay.getRoomId() != null) {
+            Link roomLink = linkTo(methodOn(RoomResource.class).findById(stay.getRoomId())).withRel("room");
+            resource.add(roomLink);
+        }
+
+        return resource;
+    }
 }
